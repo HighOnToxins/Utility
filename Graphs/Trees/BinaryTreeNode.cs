@@ -1,6 +1,6 @@
 ﻿namespace Graphs.Trees;
 
-public sealed class BinaryTreeNode<T>: ITreeNode<T> {
+public sealed class BinaryTreeNode<T>: ITreeNode<T>, IReadOnlyTreeNode<T> {
 
     public T Value { get; private set; }
 
@@ -16,11 +16,15 @@ public sealed class BinaryTreeNode<T>: ITreeNode<T> {
     public bool IsLeftChild { get; private set; }
     public bool IsRightChild { get; private set; }
 
+    IReadOnlyTreeNode<T>? IReadOnlyTreeNode<T>.Parent => Parent;
+
+    IReadOnlyTree<T>? IReadOnlyTreeNode<T>.Tree => Tree;
+
     ITreeNode<T>? ITreeNode<T>.Parent => Parent;
 
-    IReadOnlyTree<T>? ITreeNode<T>.Tree => Tree;
+    ITree<T>? ITreeNode<T>.Tree => Tree;
 
-    public IEnumerable<ITreeNode<T>> GetChildren() {
+    public IEnumerable<IReadOnlyTreeNode<T>> GetChildren() {
         if(LeftChild != null) yield return LeftChild;
         if(RightChild != null) yield return RightChild;
     }
@@ -286,8 +290,17 @@ public sealed class BinaryTreeNode<T>: ITreeNode<T> {
         }
     }
 
-    public bool IsDecendantOf(ITreeNode<T> node) => IsDecendantOf(node);
+    public bool IsDecendantOf(ITreeNode<T> node) { 
+        return node is BinaryTreeNode<T> binaryNode && IsDecendantOf(binaryNode);
+    }
 
-    public bool IsAncestorOf(ITreeNode<T> node) => IsAncestorOf(node);
+    public bool IsAncestorOf(ITreeNode<T> node) {
+        return node is BinaryTreeNode<T> binaryNode && IsAncestorOf(binaryNode);
+    }
+
+    IEnumerable<ITreeNode<T>> ITreeNode<T>.GetChildren() {
+        if(LeftChild != null) yield return LeftChild;
+        if(RightChild != null) yield return RightChild;
+    }
 
 }

@@ -23,11 +23,11 @@ public interface ITree<T> : ICollection<T> {
 
     public IReadOnlyTree<T> GetSubTree(T value);
 
-    public IReadOnlyTree<T> GetSubTree(ITreeNode<T> node);
+    public IReadOnlyTree<T> GetSubTree(IReadOnlyTreeNode<T> node);
 
-    public ITreeNode<T>? Find(T value);
+    public IReadOnlyTreeNode<T>? Find(T value);
 
-    public ITreeNode<T>? FindLast(T value);
+    public IReadOnlyTreeNode<T>? FindLast(T value);
 
     public void Visit(Action<T> action, int selfIndex = 0);
 

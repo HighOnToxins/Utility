@@ -1,4 +1,5 @@
-﻿namespace Graphs.Trees;
+﻿
+namespace Graphs.Trees;
 
 public interface ITreeNode<T> {
 
@@ -6,7 +7,7 @@ public interface ITreeNode<T> {
 
     public ITreeNode<T>? Parent { get; }
 
-    public IReadOnlyTree<T>? Tree { get; }
+    public ITree<T>? Tree { get; }
 
     public bool IsLeaf { get; }
     public bool IsRoot { get; }

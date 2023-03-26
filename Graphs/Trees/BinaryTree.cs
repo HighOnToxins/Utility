@@ -323,11 +323,11 @@ public class BinaryTree<T>: ITree<T>, IReadOnlyTree<T>, IEnumerable<T> {
 
     IReadOnlyTree<T> ITree<T>.GetSubTree(T value) => GetSubTree(value);
 
-    ITreeNode<T>? ITree<T>.Find(T value) => Find(value);
+    IReadOnlyTreeNode<T>? ITree<T>.Find(T value) => Find(value);
 
-    ITreeNode<T>? ITree<T>.FindLast(T value) => FindLast(value);
+    IReadOnlyTreeNode<T>? ITree<T>.FindLast(T value) => FindLast(value);
 
-    public IReadOnlyTree<T> GetSubTree(ITreeNode<T> node) {
+    public IReadOnlyTree<T> GetSubTree(IReadOnlyTreeNode<T> node) {
         if(node is BinaryTreeNode<T> binaryNode) {
             return GetSubTree(binaryNode);
         } else {
