@@ -5,7 +5,7 @@ namespace Graphs.Trees;
 //TODO: RegionQuadTree
 //TODO: RegionOctTree
 
-public class BinaryTree<T>: IEnumerable<T> {
+public class BinaryTree<T>: IReadOnlyCollection<T>, IEnumerable<T> {
 
     internal IComparer<T> Comparer { get; private init; }
 
