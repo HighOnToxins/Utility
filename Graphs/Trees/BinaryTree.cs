@@ -5,7 +5,7 @@ namespace Graphs.Trees;
 //TODO: RegionQuadTree
 //TODO: RegionOctTree
 
-public class BinaryTree<T>: ITree<T>, IReadOnlyTree<T>, IEnumerable<T> {
+public class BinaryTree<T>: IEnumerable<T> {
 
     internal IComparer<T> Comparer { get; private init; }
 
@@ -318,27 +318,6 @@ public class BinaryTree<T>: ITree<T>, IReadOnlyTree<T>, IEnumerable<T> {
             return InorderGetValues();
         } else {
             return PostorderGetValues();
-        }
-    }
-
-    IReadOnlyTree<T> ITree<T>.GetSubTree(T value) => GetSubTree(value);
-
-    IReadOnlyTreeNode<T>? ITree<T>.Find(T value) => Find(value);
-
-    IReadOnlyTreeNode<T>? ITree<T>.FindLast(T value) => FindLast(value);
-
-    public IReadOnlyTree<T> GetSubTree(IReadOnlyTreeNode<T> node) {
-        if(node is BinaryTreeNode<T> binaryNode) {
-            return GetSubTree(binaryNode);
-        } else {
-            throw new ArgumentException();
-        }
-    }
-
-    public void CopyTo(T[] array, int arrayIndex) {
-        foreach(T t in InorderGetValues()) {
-            array[arrayIndex] = t;
-            arrayIndex++;
         }
     }
 
