@@ -1,6 +1,6 @@
 ﻿namespace Graphs.Trees;
 
-public sealed class BinaryTreeNode<T>: IReadOnlyTreeNode<T> {
+public sealed class BinaryTreeNode<T>: ITreeNode<T> {
 
     public T Value { get; private set; }
 
@@ -16,11 +16,11 @@ public sealed class BinaryTreeNode<T>: IReadOnlyTreeNode<T> {
     public bool IsLeftChild { get; private set; }
     public bool IsRightChild { get; private set; }
 
-    IReadOnlyTreeNode<T>? IReadOnlyTreeNode<T>.Parent => Parent;
+    ITreeNode<T>? ITreeNode<T>.Parent => Parent;
 
-    IReadOnlyTree<T>? IReadOnlyTreeNode<T>.Tree => Tree;
+    IReadOnlyTree<T>? ITreeNode<T>.Tree => Tree;
 
-    public IEnumerable<IReadOnlyTreeNode<T>> GetChildren() {
+    public IEnumerable<ITreeNode<T>> GetChildren() {
         if(LeftChild != null) yield return LeftChild;
         if(RightChild != null) yield return RightChild;
     }
@@ -189,6 +189,13 @@ public sealed class BinaryTreeNode<T>: IReadOnlyTreeNode<T> {
         return values;
     }
 
+    internal int CountSubTree() {
+        int result = 0;
+        if(LeftChild != null) result += LeftChild.CountSubTree();
+        if(RightChild != null) result += RightChild.CountSubTree();
+        return result;
+    }
+
     public bool IsDecendantOf(T value) {
         if(Tree == null) {
             throw new InvalidOperationException("TreeNode did not contain refference to a tree.");
@@ -229,8 +236,8 @@ public sealed class BinaryTreeNode<T>: IReadOnlyTreeNode<T> {
         }
     }
 
-    public bool IsDecendantOf(IReadOnlyTreeNode<T> node) => IsDecendantOf(node);
+    public bool IsDecendantOf(ITreeNode<T> node) => IsDecendantOf(node);
 
-    public bool IsAncestorOf(IReadOnlyTreeNode<T> node) => IsAncestorOf(node);
+    public bool IsAncestorOf(ITreeNode<T> node) => IsAncestorOf(node);
 
 }

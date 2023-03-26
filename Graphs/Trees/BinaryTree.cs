@@ -5,21 +5,24 @@ namespace Graphs.Trees;
 //TODO: RegionQuadTree
 //TODO: RegionOctTree
 
-public class BinaryTree<T>: IReadOnlyTree<T>, IEnumerable<T> {
+public class BinaryTree<T>: ITree<T>, IReadOnlyTree<T>, IEnumerable<T> {
 
     internal IComparer<T> Comparer { get; private init; }
 
     public BinaryTreeNode<T>? Root { get; private set; }
 
+    private int count;
+    public int Count { get => count; }
+
+    public bool IsReadOnly => false;
+
     public BinaryTree(IComparer<T> comparer) {
         Comparer = comparer;
-    }
-
-    public int GetHeight() {
-        throw new NotImplementedException();
+        count = 0;
     }
 
     public void Add(T value) {
+        count++;
         if(Root == null) {
             Root = new BinaryTreeNode<T>(value, null, this, false, false);
         } else {
@@ -28,6 +31,7 @@ public class BinaryTree<T>: IReadOnlyTree<T>, IEnumerable<T> {
     }
 
     public void Add(BinaryTreeNode<T> node) {
+        count++;
         if(node.Tree != null) {
             throw new ArgumentException("The Tree node already belongs to a Tree.");
         } else if(Root == null) {
@@ -37,6 +41,7 @@ public class BinaryTree<T>: IReadOnlyTree<T>, IEnumerable<T> {
         }
     }
     public void AddRoot(T value) {
+        count++;
         BinaryTreeNode<T> node = new(value, null, this, false, false); ;
         if(Root != null) {
             BinaryTreeNode<T> prevRoot = Root;
@@ -48,6 +53,7 @@ public class BinaryTree<T>: IReadOnlyTree<T>, IEnumerable<T> {
     }
 
     public void AddRoot(BinaryTreeNode<T> node) {
+        count++;
         if(node.Tree != null) {
             throw new ArgumentException("The Tree node already belongs to a Tree.");
         } else if(Root != null) {
@@ -61,9 +67,11 @@ public class BinaryTree<T>: IReadOnlyTree<T>, IEnumerable<T> {
 
     public void Clear() {
         Root = null;
+        count = 0;
     }
 
     public void RemoveRoot() {
+        count--;
         if(Root == null) {
             throw new InvalidOperationException();
         }
@@ -81,6 +89,7 @@ public class BinaryTree<T>: IReadOnlyTree<T>, IEnumerable<T> {
             return false;
         } else if(node.Parent == null) {
             Root = null;
+            count--;
             return true;
         } else if(node.IsLeftChild) {
             node.Parent.LeftChild = null;
@@ -91,6 +100,7 @@ public class BinaryTree<T>: IReadOnlyTree<T>, IEnumerable<T> {
         if(node.LeftChild != null) node.Parent.Add(node.LeftChild);
         if(node.RightChild != null) node.Parent.Add(node.RightChild);
 
+        count--;
         return true;
     }
 
@@ -101,6 +111,7 @@ public class BinaryTree<T>: IReadOnlyTree<T>, IEnumerable<T> {
             throw new InvalidOperationException();
         } else if(node.Parent == null) {
             Root = null;
+            count--;
             return;
         } else if(node.IsLeftChild) {
             node.Parent.LeftChild = null;
@@ -110,6 +121,8 @@ public class BinaryTree<T>: IReadOnlyTree<T>, IEnumerable<T> {
 
         if(node.LeftChild != null) node.Parent.Add(node.LeftChild);
         if(node.RightChild != null) node.Parent.Add(node.RightChild);
+
+        count--;
     }
 
     public bool RemoveSubTree(T value) {
@@ -125,6 +138,7 @@ public class BinaryTree<T>: IReadOnlyTree<T>, IEnumerable<T> {
             node.Parent.RightChild = null;
         }
 
+        count -= node.CountSubTree();
         return true;
     }
 
@@ -140,6 +154,8 @@ public class BinaryTree<T>: IReadOnlyTree<T>, IEnumerable<T> {
         } else {
             node.Parent.RightChild = null;
         }
+
+        count -= node.CountSubTree();
     }
 
     public BinaryTree<T> GetSubTree(T value) {
@@ -265,14 +281,6 @@ public class BinaryTree<T>: IReadOnlyTree<T>, IEnumerable<T> {
         }
     }
 
-    IReadOnlyTree<T> IReadOnlyTree<T>.GetSubTree(T value) => GetSubTree(value);
-
-    public IReadOnlyTree<T> GetSubTree(IReadOnlyTreeNode<T> node) => GetSubTree(node);
-
-    IReadOnlyTreeNode<T>? IReadOnlyTree<T>.Find(T value) => Find(value);
-
-    IReadOnlyTreeNode<T>? IReadOnlyTree<T>.FindLast(T value) => FindLast(value);
-
     public void Visit(Action<T> action, int selfIndex = 0) {
         if(selfIndex < 0) {
             throw new ArgumentException();
@@ -295,5 +303,25 @@ public class BinaryTree<T>: IReadOnlyTree<T>, IEnumerable<T> {
         } else {
             return PostorderGetValues();
         }
+    }
+
+    IReadOnlyTree<T> ITree<T>.GetSubTree(T value) {
+        throw new NotImplementedException();
+    }
+
+    ITreeNode<T>? ITree<T>.Find(T value) {
+        throw new NotImplementedException();
+    }
+
+    ITreeNode<T>? ITree<T>.FindLast(T value) {
+        throw new NotImplementedException();
+    }
+
+    public IReadOnlyTree<T> GetSubTree(ITreeNode<T> node) {
+        throw new NotImplementedException();
+    }
+
+    public void CopyTo(T[] array, int arrayIndex) {
+        throw new NotImplementedException();
     }
 }
