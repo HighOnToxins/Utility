@@ -21,6 +21,22 @@ public class BinaryTree<T>: ITree<T>, IReadOnlyTree<T>, IEnumerable<T> {
         count = 0;
     }
 
+    public int GetHeight() {
+        if(Root == null) {
+            return 0;
+        } else {
+            return Root.GetHeight();
+        }
+    }
+
+    public int GetWidth() {
+        if(Root == null) {
+            return 0;
+        } else {
+            return Root.GetLeftMostHalfWidth() + Root.GetRightMostHalfWidth();
+        }
+    }
+
     public void Add(T value) {
         count++;
         if(Root == null) {
@@ -305,23 +321,25 @@ public class BinaryTree<T>: ITree<T>, IReadOnlyTree<T>, IEnumerable<T> {
         }
     }
 
-    IReadOnlyTree<T> ITree<T>.GetSubTree(T value) {
-        throw new NotImplementedException();
-    }
+    IReadOnlyTree<T> ITree<T>.GetSubTree(T value) => GetSubTree(value);
 
-    ITreeNode<T>? ITree<T>.Find(T value) {
-        throw new NotImplementedException();
-    }
+    ITreeNode<T>? ITree<T>.Find(T value) => Find(value);
 
-    ITreeNode<T>? ITree<T>.FindLast(T value) {
-        throw new NotImplementedException();
-    }
+    ITreeNode<T>? ITree<T>.FindLast(T value) => FindLast(value);
 
     public IReadOnlyTree<T> GetSubTree(ITreeNode<T> node) {
-        throw new NotImplementedException();
+        if(node is BinaryTreeNode<T> binaryNode) {
+            return GetSubTree(binaryNode);
+        } else {
+            throw new ArgumentException();
+        }
     }
 
     public void CopyTo(T[] array, int arrayIndex) {
-        throw new NotImplementedException();
+        foreach(T t in InorderGetValues()) {
+            array[arrayIndex] = t;
+            arrayIndex++;
+        }
     }
+
 }

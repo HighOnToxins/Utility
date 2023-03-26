@@ -3,6 +3,10 @@ namespace Graphs.Trees;
 
 public interface ITree<T> : ICollection<T> {
 
+    public int GetHeight();
+
+    public int GetWidth();
+
     public void Add(BinaryTreeNode<T> node);
 
     public void AddRoot(T value);

@@ -196,6 +196,56 @@ public sealed class BinaryTreeNode<T>: ITreeNode<T> {
         return result;
     }
 
+    internal int GetHeight() {
+        if(LeftChild != null && RightChild != null) {
+            return Math.Max(LeftChild.GetHeight(), RightChild.GetHeight()) + 1; 
+        }else if(LeftChild != null) {
+            return LeftChild.GetHeight() + 1;
+        }else if(RightChild != null) {
+            return RightChild.GetHeight() + 1;
+        } else {
+            return 1;
+        }
+    }
+
+    internal int GetRightMostHalfWidth() {
+        if(LeftChild != null && RightChild != null) {
+            int left = LeftChild.GetRightMostHalfWidth() - 1;
+            int right = RightChild.GetRightMostHalfWidth() + 1;
+
+            if(left < right) {
+                return left;
+            } else {
+                return right;
+            }
+        } else if(LeftChild != null) {
+            return LeftChild.GetRightMostHalfWidth() - 1;
+        } else if(RightChild != null) {
+            return RightChild.GetRightMostHalfWidth() + 1;
+        } else {
+            return 1;
+        }
+    }
+
+    internal int GetLeftMostHalfWidth() {
+        if(LeftChild != null && RightChild != null) {
+            int left = LeftChild.GetLeftMostHalfWidth() + 1;
+            int right = RightChild.GetLeftMostHalfWidth() - 1;
+
+            if(left < right) {
+                return left;
+            } else {
+                return right;
+            }
+        } else if(LeftChild != null) {
+            return LeftChild.GetLeftMostHalfWidth() + 1;
+        } else if(RightChild != null) {
+            return RightChild.GetLeftMostHalfWidth() - 1;
+        } else {
+            return 1;
+        }
+    }
+
     public bool IsDecendantOf(T value) {
         if(Tree == null) {
             throw new InvalidOperationException("TreeNode did not contain refference to a tree.");
