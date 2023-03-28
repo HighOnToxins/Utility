@@ -1,7 +1,7 @@
 ﻿
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
-using System.Xml.Linq;
+using System.Runtime.Intrinsics.X86;
 
 namespace Graphs.Relations;
 
@@ -9,59 +9,63 @@ public class Graph<T>: IEnumerable<GraphNode<T>> where T : notnull {
 
     private readonly Dictionary<T, GraphNode<T>> nodes;
 
-    public int Count => nodes.Count;
+    public int NodeCount => nodes.Count;
 
-    public int RelationCount { get; private set; }
+    public int EdgeCount { get; private set; }
 
     public Graph() {
         nodes = new();
-        RelationCount = 0;
+        EdgeCount = 0;
     }
 
     public bool AddVertex(T item) {
         if(nodes.ContainsKey(item)) {
             return false;
         } else {
-            nodes.Add(item, new(item));
+            nodes.Add(item, new(item, this));
             return true;
         }
     }
 
-    public bool AddVertex(GraphNode<T> node) {
-        if(node.Relation != null) {
-            throw new ArgumentException("The vertex already belongs to a relation.");
-        } else if(nodes.ContainsValue(node)) {
-            return false;
-        } else {
-            nodes.Add(node.Value, new(node.Value));
-            return true;
-        }
-    }
-
+    //only adds the edge if the given nodes allready exist
     public bool AddEdge(T item0, T item1) {
         if(!nodes.TryGetValue(item0, out GraphNode<T>? node0) ||
             !nodes.TryGetValue(item1, out GraphNode<T>? node1)) {
             return false;
         }
 
-        node0.AddEdgeTo(node1);
-        return true;
+        return node0.AddEdgeTo(node1);
     }
 
-    public void AddEdge(GraphNode<T> node0, GraphNode<T> node1) {
-        if(!Equals(node0.Relation) || !Equals(node1.Relation)) {
+    public bool AddEdge(GraphNode<T> node0, GraphNode<T> node1) {
+        if(!Equals(node0.Graph) || !Equals(node1.Graph)) {
             throw new ArgumentException("One of the given nodes was not from the relation.");
         }
 
-        node0.AddEdgeTo(node1);
+        return node0.AddEdgeTo(node1);
     }
 
-    public bool ContainsVertex(T item) {
+    public bool ContainsValue(T item) {
         return nodes.ContainsKey(item);
     }
 
     public bool ContainsEdge(T item0, T item1) {
-        return nodes.TryGetValue(item0, out GraphNode<T>? node0) && node0.RelationsTo.ContainsKey(item1);
+        return nodes.TryGetValue(item0, out GraphNode<T>? node0) && node0.OutwardEdges.ContainsKey(item1);
+    }
+
+    public bool ContainsEdge(GraphNode<T> node0, GraphNode<T> node1) {
+        bool e0 = !Equals(node0.Graph);
+        bool e1 = !Equals(node1.Graph);
+
+        if(e0 && e1) {
+            throw new ArgumentException($"The relation of {node0} and {node1}, did not match the relation it was given to.");
+        } else if(e0) {
+            throw new ArgumentException($"The relation of {node0}, did not match the relation it was given to.");
+        } else if(e1) {
+            throw new ArgumentException($"The relation of {node1}, did not match the relation it was given to.");
+        }
+
+        return node0.OutwardEdges.ContainsKey(node1.Value);
     }
 
     public bool TryGetValue(T item, [NotNullWhen(true)] out GraphNode<T>? result) {
@@ -72,21 +76,23 @@ public class Graph<T>: IEnumerable<GraphNode<T>> where T : notnull {
         nodes.Clear();
     }
 
-    public bool RemoveVertex(T item) {
+    public bool RemoveNode(T item) {
         if(nodes.TryGetValue(item, out GraphNode<T>? node)) {
-            foreach((T _, GraphNode<T> n) in node.RelationsTo) n.CutFrom(node);
-            nodes.Remove(item);
-            return true;
+            bool b0 = false;
+            foreach((T _, GraphNode<T> n) in node.OutwardEdges) b0 |= n.CutFrom(node);
+            bool b1 = nodes.Remove(item);
+            return b0 || b1;
         } else {
             return false;
         }
     }
 
-    public bool RemoveVertex(GraphNode<T> node) {
-        if(Equals(node.Relation)) {
-            foreach((T _, GraphNode<T> n) in node.RelationsTo) n.CutFrom(node);
-            nodes.Remove(node.Value);
-            return true;
+    public bool RemoveNode(GraphNode<T> node) {
+        if(Equals(node.Graph)) {
+            bool b0 = false;
+            foreach((T _, GraphNode<T> n) in node.OutwardEdges) b0 |= n.CutFrom(node);
+            bool b1 = nodes.Remove(node.Value);
+            return b0 || b1;
         } else {
             return false;
         }
@@ -95,58 +101,28 @@ public class Graph<T>: IEnumerable<GraphNode<T>> where T : notnull {
     public bool RemoveEdge(T item0, T item1) {
         if(nodes.TryGetValue(item0, out GraphNode<T>? node0) &&
                 nodes.TryGetValue(item1, out GraphNode<T>? node1)) {
-            node0.RemoveEdgeTo(node1);
-            return true;
+            return node0.RemoveEdgeTo(node1);
         } else {
             return false;
         }
     }
 
     public bool RemoveEdge(GraphNode<T> node0, GraphNode<T> node1) {
-        if(Equals(node0.Relation) && Equals(node1.Relation)) {
-            node0.RemoveEdgeTo(node1);
-            return true;
+        if(Equals(node0.Graph) && Equals(node1.Graph)) {
+            return node0.RemoveEdgeTo(node1);
         } else {
             return false;
         }
     }
 
-    public void IntersectWith(Graph<T> relation) {
-        throw new NotImplementedException();
-    }
-
-    public bool IsProperSubsetOf(Graph<T> relation) {
-        throw new NotImplementedException();
-    }
-
-    public bool IsProperSupersetOf(Graph<T> relation) {
-        throw new NotImplementedException();
-    }
-
-    public bool IsSubsetOf(Graph<T> relation) {
-        throw new NotImplementedException();
-    }
-
-    public bool IsSupersetOf(Graph<T> relation) {
-        throw new NotImplementedException();
-    }
-
-    public bool Overlaps(Graph<T> relation) {
-        throw new NotImplementedException();
-    }
-
-    public void SetEquals(Graph<T> relation) {
-        throw new NotImplementedException();
-    }
-
     public bool IsReflexive() {
-        return nodes.All(p => p.Value.RelationsTo.ContainsKey(p.Key));
+        return nodes.All(p => p.Value.OutwardEdges.ContainsKey(p.Key));
     }
 
     public bool IsSymetric() {
         foreach((T t, GraphNode<T> node) in nodes) {
-            foreach((T t2, GraphNode<T> node2) in node.RelationsTo) {
-                if(!node2.RelationsTo.ContainsKey(t2)) {
+            foreach((T t2, GraphNode<T> node2) in node.OutwardEdges) {
+                if(!node2.OutwardEdges.ContainsKey(t2)) {
                     return false;
                 }
             }
@@ -157,8 +133,8 @@ public class Graph<T>: IEnumerable<GraphNode<T>> where T : notnull {
 
     public bool IsAntisymetric() {
         foreach((T t, GraphNode<T> node) in nodes) {
-            foreach((T t2, GraphNode<T> node2) in node.RelationsTo) {
-                if(!t.Equals(t2) && node2.RelationsTo.ContainsKey(t2)) {
+            foreach((T t2, GraphNode<T> node2) in node.OutwardEdges) {
+                if(!t.Equals(t2) && node2.OutwardEdges.ContainsKey(t2)) {
                     return false;
                 }
             }
