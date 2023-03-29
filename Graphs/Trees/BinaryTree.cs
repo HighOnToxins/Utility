@@ -56,6 +56,7 @@ public class BinaryTree<T>: IReadOnlyCollection<T>, IEnumerable<T> {
             Root.Add(node);
         }
     }
+    
     public void AddRoot(T value) {
         count++;
         BinaryTreeNode<T> node = new(value, null, this, false, false); ;
@@ -81,9 +82,44 @@ public class BinaryTree<T>: IReadOnlyCollection<T>, IEnumerable<T> {
         }
     }
 
-    public void Clear() {
-        Root = null;
-        count = 0;
+    public BinaryTree<T> GetSubTree(T value) {
+        BinaryTreeNode<T>? node = Find(value);
+
+        if(node == null) {
+            throw new ArgumentException("The given value did not exist within the tree!");
+        }
+
+        BinaryTree<T> subTree = new(Comparer);
+        foreach(T t in node.PreorderGetValues()) {
+            subTree.Add(t);
+        }
+        return subTree;
+    }
+
+    public BinaryTree<T> GetSubTree(BinaryTreeNode<T> node) {
+        if(node == null) {
+            throw new ArgumentException("The given value did not exist within the tree!");
+        } else if(!Equals(node.Tree)) {
+            throw new ArgumentException("The tree of the given node did not match the tree it was given to.");
+        }
+
+        BinaryTree<T> subTree = new(Comparer);
+        foreach(T t in node.PreorderGetValues()) {
+            subTree.Add(t);
+        }
+        return subTree;
+    }
+
+    public BinaryTreeNode<T>? Find(T value) {
+        return Root?.Find(value);
+    }
+
+    public BinaryTreeNode<T>? FindLast(T value) {
+        return Root?.FindLast(value);
+    }
+
+    public bool Contains(T value) {
+        return Root != null && Root.Contains(value);
     }
 
     public void RemoveRoot() {
@@ -174,40 +210,9 @@ public class BinaryTree<T>: IReadOnlyCollection<T>, IEnumerable<T> {
         count -= node.CountSubTree();
     }
 
-    public BinaryTree<T> GetSubTree(T value) {
-        BinaryTreeNode<T>? node = Find(value);
-
-        if(node == null) {
-            throw new ArgumentException("The given value did not exist within the tree!");
-        }
-
-        BinaryTree<T> subTree = new(Comparer);
-        foreach(T t in node.PreorderGetValues()) {
-            subTree.Add(t);
-        }
-        return subTree;
-    }
-
-    public BinaryTree<T> GetSubTree(BinaryTreeNode<T> node) {
-        if(node == null) {
-            throw new ArgumentException("The given value did not exist within the tree!");
-        } else if(!Equals(node.Tree)) {
-            throw new ArgumentException("The tree of the given node did not match the tree it was given to.");
-        }
-
-        BinaryTree<T> subTree = new(Comparer);
-        foreach(T t in node.PreorderGetValues()) {
-            subTree.Add(t);
-        }
-        return subTree;
-    }
-
-    public BinaryTreeNode<T>? Find(T value) {
-        return Root?.Find(value);
-    }
-
-    public BinaryTreeNode<T>? FindLast(T value) {
-        return Root?.FindLast(value);
+    public void Clear() {
+        Root = null;
+        count = 0;
     }
 
     public T Max() {
@@ -240,10 +245,6 @@ public class BinaryTree<T>: IReadOnlyCollection<T>, IEnumerable<T> {
         } else {
             return Root.MinNode();
         }
-    }
-
-    public bool Contains(T value) {
-        return Root != null && Root.Contains(value);
     }
 
     public void PreorderVisit(Action<T> action) {
@@ -281,6 +282,7 @@ public class BinaryTree<T>: IReadOnlyCollection<T>, IEnumerable<T> {
             return Enumerable.Empty<T>();
         }
     }
+    
     public IEnumerator<T> GetEnumerator() {
         if(Root != null) {
             return Root.InorderGetValues().GetEnumerator();
@@ -294,30 +296,6 @@ public class BinaryTree<T>: IReadOnlyCollection<T>, IEnumerable<T> {
             return Root.InorderGetValues().GetEnumerator();
         } else {
             return Enumerable.Empty<T>().GetEnumerator();
-        }
-    }
-
-    public void Visit(Action<T> action, int selfIndex = 0) {
-        if(selfIndex < 0) {
-            throw new ArgumentException();
-        } else if(selfIndex == 0) {
-            PreorderVisit(action);
-        } else if(selfIndex == 1) {
-            InorderVisit(action);
-        } else {
-            PostorderVisit(action);
-        }
-    }
-
-    public IEnumerable<T> GetValues(int selfIndex = 0) {
-        if(selfIndex < 0) {
-            throw new ArgumentException();
-        } else if(selfIndex == 0) {
-            return PreorderGetValues();
-        } else if(selfIndex == 1) {
-            return InorderGetValues();
-        } else {
-            return PostorderGetValues();
         }
     }
 
