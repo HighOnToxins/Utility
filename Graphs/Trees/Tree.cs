@@ -12,75 +12,123 @@ public class Tree<T> {
     }
 
     public int GetHeight() {
-        throw new NotImplementedException();
-    }
-
-    public int GetWidth() {
-        throw new NotImplementedException();
+        if(Root == null) {
+            return 0;
+        } else {
+            return Root.GetHeight();
+        }
     }
 
     public void AddRoot(T item) {
-        throw new NotImplementedException();
+        if(Root == null) {
+            Root = new TreeNode<T>(item, this, null);
+        } else {
+            TreeNode<T> prevRoot = Root;
+            Root = new TreeNode<T>(item, this, null);
+            Root.AddChild(prevRoot);
+        }
     }
 
     public void AddRoot(TreeNode<T> node) {
-        throw new NotImplementedException();
-    }
-
-    public void AddChild(T? parentItem, T childItem) {
-        throw new NotImplementedException();
+        if(node.Tree != null) {
+            throw new ArgumentException("The Tree node already belongs to a Tree.");
+        } else if(Root == null) {
+            Root = node;
+        } else {
+            TreeNode<T> prevRoot = Root;
+            Root = node;
+            Root.AddChild(prevRoot);
+        }
     }
 
     public void AddChild(TreeNode<T>? parentNode, T childItem) {
-        throw new NotImplementedException();
+        if(parentNode == null) {
+            AddRoot(childItem);
+        } else if(!Equals(parentNode.Tree)) {
+            throw new ArgumentException("The tree of the given node did not match the tree it was given to.");
+        } else {
+            parentNode.AddChild(new TreeNode<T>(childItem));
+        }
     }
 
     public void AddChild(TreeNode<T>? parentNode, TreeNode<T> childNode) {
-        throw new NotImplementedException();
-    }
-
-    public void AddTree(T parentItem, Tree<T> tree) {
-        throw new NotImplementedException();
+        if(parentNode == null) {
+            AddRoot(childNode);
+        } else if(!Equals(parentNode.Tree)) {
+            throw new ArgumentException("The tree of the given node did not match the tree it was given to.");
+        } else if(childNode.Tree != null) {
+            throw new ArgumentException("The tree node already belongs to a tree.");
+        } else { 
+            parentNode.AddChild(childNode);
+        }
     }
 
     public void AddTree(TreeNode<T> parentNode, Tree<T> tree) {
-        throw new NotImplementedException();
-    }
-
-    public Tree<T> GetSubTree(T value) {
-        throw new NotImplementedException();
+        if(!Equals(parentNode.Tree)) {
+            throw new ArgumentException("The tree of the given node did not match the tree it was given to.");
+        } else if(tree.Root != null) {
+            TreeNode<T> node = tree.Root.Clone();
+            node.AssignTreeToSubTree(this);
+            parentNode.AddChild(node);
+        }
     }
 
     public Tree<T> GetSubTree(TreeNode<T> node) {
-        throw new NotImplementedException();
+        if(!Equals(node.Tree)) {
+            throw new ArgumentException("The tree of the given node did not match the tree it was given to.");
+        } else {
+            Tree<T> tree = new() {
+                Root = node.Clone()
+            };
+            tree.Root.AssignTreeToSubTree(tree);
+            return tree;
+        }
     }
 
     public TreeNode<T>? Find(T value) {
-        throw new NotImplementedException();
-    }
-
-    public TreeNode<T>? FindLast(T value) {
-        throw new NotImplementedException();
+        return Root?.Find(value);
     }
 
     public bool Contains(T value) {
-        throw new NotImplementedException();
-    }
-
-    public void RemoveNode(T item) {
-        throw new NotImplementedException();
+        if(Root == null) {
+            return false;
+        } else {
+            return Root.Contains(value);
+        }
     }
 
     public void RemoveNode(TreeNode<T> node) {
-        throw new NotImplementedException();
+
+        IReadOnlyList<TreeNode<T>> children = node.Children;
+
+        if(!Equals(node.Tree)) {
+            throw new ArgumentException("The tree of the given node did not match the tree it was given to.");
+        }else if(node.Parent == null) {
+            if(children.Count == 0) {
+                Root = null;
+                return;
+            } else {
+                throw new InvalidOperationException("The root of a tree can not be removed unless it has no children.");
+            }
+        }
+
+        node.Parent.Remove(node);
+        foreach(TreeNode<T> child in children) {
+            node.Parent.AddChild(child.Clone());
+        }
     }
 
-    public void RemoveSubTree(T item) {
-        throw new NotImplementedException();
+    public void RemoveSubTree(TreeNode<T> node) {
+        if(!Equals(node.Tree)) {
+            throw new ArgumentException("The tree of the given node did not match the tree it was given to.");
+        } else if(node.Parent == null) {
+            Root = null;
+        } else {
+            node.Parent.RemoveSubTree(node);
+        }
     }
 
-    public void RemoveSubTree(TreeNode<T> item) {
-        throw new NotImplementedException();
+    public void Clear() {
+        Root = null;
     }
-    
 }

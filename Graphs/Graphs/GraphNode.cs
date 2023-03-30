@@ -3,7 +3,11 @@ namespace Graphs.Relations;
 
 public sealed class GraphNode<T> where T : notnull{
 
-    public T Value { get; set; }
+    private T value;
+
+    public T Value { get => value; set => this.value = value; }
+
+    public ref T ValueRef { get => ref value; }
 
     public Graph<T>? Graph { get; private set; }
 

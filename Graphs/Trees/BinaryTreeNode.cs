@@ -5,7 +5,7 @@ public sealed class BinaryTreeNode<T> {
     public T Value { get; private set; }
 
     public BinaryTreeNode<T>? Parent { get; private set; }
-    public BinaryTreeNode<T>? LeftChild { get; internal set; }
+    public BinaryTreeNode<T>? LeftChild { get; internal set; } //TODO: remove internal set of LeftChild, add set of left child in current class (BinaryTreeNode)
     public BinaryTreeNode<T>? RightChild { get; internal set; }
 
     public BinaryTree<T>? Tree { get; internal set; }
