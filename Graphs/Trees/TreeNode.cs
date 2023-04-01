@@ -19,17 +19,16 @@ public sealed class TreeNode<T> {
 
     public Tree<T>? Tree { get; internal set; }
 
-    public bool IsLeaf { get => children.Count == 0; }
-    public bool IsRoot { get => Parent != null; }
+    public bool IsLeaf { get => Tree != null && children.Count == 0; }
+    public bool IsRoot { get => Tree != null && Parent == null; }
 
     public TreeNode(T value) {
         this.value = value;
         children = new();
     }
 
-    internal TreeNode(T value, Tree<T>? tree, TreeNode<T>? parent) : this(value){
+    internal TreeNode(T value, Tree<T>? tree) : this(value){
         Tree = tree;
-        Parent = parent;
     }
 
     internal int GetHeight() {
@@ -96,5 +95,9 @@ public sealed class TreeNode<T> {
             AddChild(child);
             child.Parent = this;
         }
+    }
+
+    internal int CountNodes() {
+        throw new NotImplementedException();
     }
 }

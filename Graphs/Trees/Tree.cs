@@ -21,12 +21,13 @@ public class Tree<T> {
 
     public void AddRoot(T item) {
         if(Root == null) {
-            Root = new TreeNode<T>(item, this, null);
+            Root = new TreeNode<T>(item, this);
         } else {
             TreeNode<T> prevRoot = Root;
-            Root = new TreeNode<T>(item, this, null);
+            Root = new TreeNode<T>(item, this);
             Root.AddChild(prevRoot);
         }
+        NodeCount++;
     }
 
     public void AddRoot(TreeNode<T> node) {
@@ -39,6 +40,7 @@ public class Tree<T> {
             Root = node;
             Root.AddChild(prevRoot);
         }
+        NodeCount++;
     }
 
     public void AddChild(TreeNode<T>? parentNode, T childItem) {
@@ -47,7 +49,8 @@ public class Tree<T> {
         } else if(!Equals(parentNode.Tree)) {
             throw new ArgumentException("The tree of the given node did not match the tree it was given to.");
         } else {
-            parentNode.AddChild(new TreeNode<T>(childItem));
+            parentNode.AddChild(new TreeNode<T>(childItem, this));
+            NodeCount++;
         }
     }
 
@@ -60,6 +63,7 @@ public class Tree<T> {
             throw new ArgumentException("The tree node already belongs to a tree.");
         } else { 
             parentNode.AddChild(childNode);
+            NodeCount++;
         }
     }
 
@@ -71,6 +75,7 @@ public class Tree<T> {
             node.AssignTreeToSubTree(this);
             parentNode.AddChild(node);
         }
+        NodeCount += tree.NodeCount;
     }
 
     public Tree<T> GetSubTree(TreeNode<T> node) {
@@ -98,7 +103,6 @@ public class Tree<T> {
     }
 
     public void RemoveNode(TreeNode<T> node) {
-
         IReadOnlyList<TreeNode<T>> children = node.Children;
 
         if(!Equals(node.Tree)) {
@@ -116,6 +120,7 @@ public class Tree<T> {
         foreach(TreeNode<T> child in children) {
             node.Parent.AddChild(child.Clone());
         }
+        NodeCount--;
     }
 
     public void RemoveSubTree(TreeNode<T> node) {
@@ -126,6 +131,7 @@ public class Tree<T> {
         } else {
             node.Parent.RemoveSubTree(node);
         }
+        NodeCount -= node.CountNodes();
     }
 
     public void Clear() {
