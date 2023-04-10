@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Graphs", "Graphs\Graphs.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Search", "Search\Search.csproj", "{4D0D7F26-72E0-4F98-AA0F-EDFCFEF7B8DA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Math", "Math\Math.csproj", "{07C55AF7-A1EC-408E-9B78-9F496031E303}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{4D0D7F26-72E0-4F98-AA0F-EDFCFEF7B8DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4D0D7F26-72E0-4F98-AA0F-EDFCFEF7B8DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4D0D7F26-72E0-4F98-AA0F-EDFCFEF7B8DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{07C55AF7-A1EC-408E-9B78-9F496031E303}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{07C55AF7-A1EC-408E-9B78-9F496031E303}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{07C55AF7-A1EC-408E-9B78-9F496031E303}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{07C55AF7-A1EC-408E-9B78-9F496031E303}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
