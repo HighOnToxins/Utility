@@ -31,13 +31,13 @@ public sealed class Automaton<T>
         yield return frontier;
     }
 
-    public IEnumerable<Token<T>> ReadTokens(string s)
+    public IEnumerable<TToken> ReadTokens<TToken>(string s, Func<T, char, Index, TToken> tokenFactory)
     {
         T frontier = initialState;
 
         for(int i = 0; i < s.Length; i++)
         {
-            yield return new Token<T>(frontier, s[i], i);
+            yield return tokenFactory.Invoke(frontier, s[i], i);
             frontier = transitions.Invoke(frontier, s[i]);
         }
 
@@ -46,8 +46,6 @@ public sealed class Automaton<T>
             throw new ArgumentException("The automaton ended on the wrong state.");
         }
 
-        yield return new Token<T>(frontier, s[^1], ^1);
+        yield return tokenFactory.Invoke(frontier, s[^1], ^1);
     }
 }
-
-public record Token<T>(T State, char Lexeme, Index Index);
