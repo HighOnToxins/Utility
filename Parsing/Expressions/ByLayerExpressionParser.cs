@@ -188,7 +188,47 @@ public static class ByLayerExpressionParser
             Expression @operator = ParseSymbol(s[^1].ToString());
             return new Operator(operand, @operator);
         }
-        return ParseDot(s);
+        return ParseParameter(s);
+    }
+
+    private static Expression ParseParameter(string s)
+    {
+        int layer = 0;
+        int i = s.Length;
+        bool isNotDot = false;
+        for(int j = 0; j < s.Length; j++)
+        {
+            if(layer == 0 && s[j] != '.')
+            {
+                if(isNotDot)
+                {
+                    i = j;
+                    break;
+                }
+                isNotDot = true;
+            }
+            else
+            {
+                isNotDot = false;
+            }
+
+            switch(s[j])
+            {
+                case '(': layer++; break;
+                case ')': layer--; break;
+            }
+
+        }
+
+        Expression leftOperand = ParseDot(s[.. i]);
+
+        if(i == s.Length)
+        {
+            return leftOperand;
+        }
+
+        Expression rightOperand = ParseParameter(s[i..]);
+        return new Operator(leftOperand, rightOperand);
     }
 
     private static Expression ParseDot(string s)
@@ -203,7 +243,7 @@ public static class ByLayerExpressionParser
                     {
                         Expression leftOperand = ParseDot(s[..i]);
                         Expression @operator = ParseSymbol(s[i].ToString());
-                        Expression rightOperand = ParseParameter(s[(i + 1)..]);
+                        Expression rightOperand = ParseContainer(s[(i + 1)..]);
                         return new Operator(leftOperand, @operator, rightOperand);
                     }
                     break;
@@ -211,46 +251,61 @@ public static class ByLayerExpressionParser
                 case ')': layer++; break;
             }
         }
-        return ParseParameter(s);
+
+        return ParseContainer(s);
     }
 
-    private static Expression ParseParameter(string s)
+    private static Expression ParseContainer(string s)
     {
-        Expression leftOperand;
-        int i = -1;
-        if(s[0] == '(')
+        if(s[0] == '(' && s[^1] == ')')
         {
+            bool isTuple = false;
+            List<Expression> operands = new() {
+                ParseSymbol(s[0].ToString()),
+            };
+
             int layer = 1;
+            int lastIndex = 1;
             for(int j = 1; j < s.Length; j++)
             {
                 switch(s[j])
                 {
+                    case ',':
+                    case ';':
+                        isTuple = true;
+                        if(layer == 1)
+                        {
+                            if(s[lastIndex..j] != "")
+                            {
+                                operands.Add(Parse(s[lastIndex..j]));
+                            }
+                            operands.Add(ParseSymbol(s[j].ToString()));
+                            lastIndex = j + 1;
+                        }
+                        break;
                     case '(': layer++; break;
                     case ')': layer--; break;
                 }
-
-                if(layer == 0)
-                {
-                    i = j;
-                    break;
-                }
             }
 
-            leftOperand = ParseParenthesis(s[..(i+1)]);
-        }
-        else
-        {
-            leftOperand = ParseSymbol(s[0].ToString());
-            i = 0;
+            if(s[lastIndex..^1] != "")
+            {
+                operands.Add(Parse(s[lastIndex..^1]));
+            }
+
+            if(isTuple || operands.Count == 1)
+            {
+                operands.Add(ParseSymbol(s[^1].ToString()));
+                return new Operator(operands);
+            }
+            else
+            {
+                return operands[1];
+            }
+
         }
 
-        if(i == s.Length - 1)
-        {
-            return leftOperand;
-        }
-
-        Expression rightOperand = ParseParameter(s[(i + 1)..]);
-        return new Operator(leftOperand, rightOperand);
+        return ParseSymbol(s);
     }
 
     private static Expression ParseSymbol(string s)
@@ -258,64 +313,5 @@ public static class ByLayerExpressionParser
         return new SymbolExp(s);
     }
 
-    private static Expression ParseParenthesis(string s)
-    {
-        if(s[1..^1] == "")
-        {
-            return ParseTuple(s);
-        }
 
-        int layer = 0;
-        for(int j = 0; j < s.Length; j++)
-        {
-            switch(s[j])
-            {
-                case '(': layer++; break;
-                case ')': layer--; break;
-                case ',': case ';': if(layer == 1) {
-                    return ParseTuple(s);
-                } break;
-            }
-        }
-
-        return Parse(s[1..^1]);
-    }
-
-    private static Expression ParseTuple(string s)
-    {
-        List<Expression> operands = new() {
-            ParseSymbol(s[0].ToString()),
-        };
-
-        int layer = 0;
-        int lastIndex = 1;
-        for(int j = 0; j < s.Length; j++)
-        {
-            switch(s[j])
-            {
-                case ',':
-                case ';':
-                    if(layer == 1)
-                    {
-                        if(s[lastIndex..j] != "")
-                        {
-                            operands.Add(Parse(s[lastIndex..j]));
-                        }
-                        operands.Add(ParseSymbol(s[j].ToString()));
-                        lastIndex = j + 1;
-                    }
-                    break;
-                case '(': layer++; break;
-                case ')': layer--; break;
-            }
-        }
-
-        if(s[lastIndex..^1] != "")
-        {
-            operands.Add(Parse(s[lastIndex..^1]));
-        }
-
-        operands.Add(ParseSymbol(s[^1].ToString()));
-        return new Operator(operands);
-    }
 }
