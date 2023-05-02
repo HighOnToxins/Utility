@@ -21,8 +21,9 @@ public static class ByLayerExpressionParser
                 case '=': case '>': case '<':
                     if(layer == 0)
                     {
-                        operands.Add(ParseOr(s[lastIndex..(i - 1)]));
+                        operands.Add(ParseOr(s[lastIndex..i]));
                         operands.Add(ParseSymbol(s[i].ToString()));
+                        lastIndex = i + 1;
                     }
                     break;
                 case '(': layer++; break;
@@ -32,7 +33,7 @@ public static class ByLayerExpressionParser
 
         if(operands.Count > 0)
         {
-            operands.Add(ParseOr(s[lastIndex..^1]));
+            operands.Add(ParseOr(s[lastIndex..^0]));
             return new Operator(operands);
         }
         else
@@ -312,6 +313,4 @@ public static class ByLayerExpressionParser
     {
         return new SymbolExp(s);
     }
-
-
 }
