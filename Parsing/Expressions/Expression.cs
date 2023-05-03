@@ -3,43 +3,53 @@ namespace Parsing.Expressions;
 
 public abstract class Expression
 {
-    public Expression? Operator { get; internal set; }
+    public Expression? Parent { get; internal set; }
 
-
+    public abstract Expression Clone();
 }
 
-public sealed class SymbolExp: Expression
+public sealed class Symbol: Expression
 {
-    public string Symbol { get; private init; }
+    public string Name { get; private init; }
 
 
-    public SymbolExp(string symbol) 
+    public Symbol(string name) 
     {
-        Symbol = symbol;
+        Name = name;
+    }
+
+    public override Expression Clone()
+    {
+        return new Symbol(Name);
     }
 }
 
-public sealed class Operator : Expression
+public sealed class Operation : Expression
 {
+    public Expression Operator { get; private init; }
     public IReadOnlyList<Expression> Operands { get; private init; }
 
-
-    public Operator(params Expression[] operands) : this((IReadOnlyList<Expression>) operands)
+    public Operation(Expression @operator, params Expression[] operands) : this(@operator, (IReadOnlyList<Expression>) operands)
     {
     }
 
-    public Operator(IReadOnlyList<Expression> operands)
+    public Operation(Expression @operator, IReadOnlyList<Expression> operands)
     {
+        Operator = @operator;
         Operands = operands;
 
         foreach(Expression expression in Operands)
         {
-            if(expression.Operator != null)
+            if(expression.Parent != null)
             {
                 throw new ArgumentException($"The given expression {expression} is allready an operand of another expression.");
             }
-            expression.Operator = this;
+            expression.Parent = this;
         }
     }
 
+    public override Expression Clone()
+    {
+        return new Operation(Operator.Clone(), Operands.Select(e => e.Clone()).ToArray());
+    }
 }
