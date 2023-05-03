@@ -1,4 +1,6 @@
 ﻿
+using System.Diagnostics.CodeAnalysis;
+
 namespace Parsing.Expressions;
 
 /// <summary> An expression parser that parses each layer one at a time. And uses parenthesis to inform structure.</summary>
@@ -6,40 +8,31 @@ public static class ByLayerExpressionParser
 {
     public static Expression Parse(string s)
     {
-        return ParseRelation(new string(s.Where(c => !char.IsWhiteSpace(c)).ToArray()));
+        string s2 = new(s.Where(c => !char.IsWhiteSpace(c)).ToArray());
+        return ParseEquation(s2);
     }
 
-    private static Expression ParseRelation(string s)
+    private static Expression ParseEquation(string s)
     {
-        List<Expression> operands = new();
-        int lastIndex = 0;
         int layer = 0;
-        for(int i = 0; i < s.Length; i++)
+        for(int i = s.Length - 1; i >= 0; i--)
         {
             switch(s[i])
             {
-                case '=': case '>': case '<':
+                case '=':
                     if(layer == 0)
                     {
-                        operands.Add(ParseOr(s[lastIndex..i]));
-                        operands.Add(ParseSymbol(s[i].ToString()));
-                        lastIndex = i + 1;
+                        Expression @operator = ParseSymbol(s[i].ToString());
+                        Expression leftOperand = ParseExpression(s[..i]);
+                        Expression rightOperand = ParseTerm(s[(i + 1)..]);
+                        return new Operation(@operator, leftOperand, rightOperand);
                     }
                     break;
-                case '(': layer++; break;
-                case ')': layer--; break;
+                case '(': layer--; break;
+                case ')': layer++; break;
             }
         }
-
-        if(operands.Count > 0)
-        {
-            operands.Add(ParseOr(s[lastIndex..^0]));
-            return new Operator(operands);
-        }
-        else
-        {
-            return ParseOr(s);
-        }
+        return ParseOr(s);
     }
 
     private static Expression ParseOr(string s)
@@ -52,10 +45,10 @@ public static class ByLayerExpressionParser
                 case '|':
                     if(layer == 0)
                     {
-                        Expression leftOperand = ParseOr(s[..i]);
                         Expression @operator = ParseSymbol(s[i].ToString());
+                        Expression leftOperand = ParseOr(s[..i]);
                         Expression rightOperand = ParseAnd(s[(i + 1)..]);
-                        return new Operator(leftOperand, @operator, rightOperand);
+                        return new Operation(@operator, leftOperand, rightOperand);
                     }
                     break;
                 case '(': layer++;  break;
@@ -76,10 +69,10 @@ public static class ByLayerExpressionParser
                 case '&':
                     if(layer == 0)
                     {
-                        Expression leftOperand = ParseAnd(s[..i]);
                         Expression @operator = ParseSymbol(s[i].ToString());
+                        Expression leftOperand = ParseAnd(s[..i]);
                         Expression rightOperand = ParseNot(s[(i + 1)..]);
-                        return new Operator(leftOperand, @operator, rightOperand);
+                        return new Operation(@operator, leftOperand, rightOperand);
                     }
                     break;
                 case '(': layer--; break;
@@ -96,7 +89,31 @@ public static class ByLayerExpressionParser
         {
             Expression @operator = ParseSymbol(s[0].ToString());
             Expression operand = ParseNot(s[1..]);
-            return new Operator(@operator, operand);
+            return new Operation(@operator, operand);
+        }
+        return ParseRelations(s);
+    }
+
+    private static Expression ParseRelations(string s)
+    {
+        int layer = 0;
+        for(int i = s.Length - 1; i >= 0; i--)
+        {
+            switch(s[i])
+            {
+                case '>':
+                case '<':
+                    if(layer == 0)
+                    {
+                        Expression @operator = ParseSymbol(s[i].ToString());
+                        Expression leftOperand = ParseRelations(s[..i]);
+                        Expression rightOperand = ParseExpression(s[(i + 1)..]);
+                        return new Operation(@operator, leftOperand, rightOperand);
+                    }
+                    break;
+                case '(': layer--; break;
+                case ')': layer++; break;
+            }
         }
         return ParseExpression(s);
     }
@@ -110,11 +127,11 @@ public static class ByLayerExpressionParser
             {
                 case '+': case '-':
                     if(layer == 0 && i - 1 >= 0 && s[i - 1] != '+' && s[i - 1] != '-' && s[i - 1] != '*' && s[i - 1] != '/' && s[i - 1] != '%' && s[i - 1] != '^')
-                    {
+                    {   //Expression analysis???
                         Expression leftOperand = ParseExpression(s[..i]);
                         Expression @operator = ParseSymbol(s[i].ToString());
-                        Expression rightOperand = ParseSign(s[(i + 1)..]);
-                        return new Operator(leftOperand, @operator, rightOperand);
+                        Expression rightOperand = ParseTerm(s[(i + 1)..]);
+                        return new Operation(@operator, leftOperand, rightOperand);
                     }
                     break;
                 case '(': layer--; break;
@@ -137,7 +154,7 @@ public static class ByLayerExpressionParser
                         Expression leftOperand = ParseTerm(s[..i]);
                         Expression @operator = ParseSymbol(s[i].ToString());
                         Expression rightOperand = ParseSign(s[(i + 1)..]);
-                        return new Operator(leftOperand, @operator, rightOperand);
+                        return new Operation(@operator, leftOperand, rightOperand);
                     }
                     break;
                 case '(': layer--; break;
@@ -149,11 +166,11 @@ public static class ByLayerExpressionParser
 
     private static Expression ParseSign(string s)
     {
-        if(s[0] == '-' || s[0] == '+')
+        if((s[0] == '-' || s[0] == '+') && s.Length > 1)
         {
             Expression operand = ParseSign(s[1..]);
             Expression @operator = ParseSymbol(s[0].ToString());
-            return new Operator(@operator, operand);
+            return new Operation(@operator, operand);
         }
         return ParsePower(s);
     }
@@ -168,10 +185,10 @@ public static class ByLayerExpressionParser
                 case '^':
                     if(layer == 0)
                     {
-                        Expression leftOperand = ParseFactorial(s[..i]);
                         Expression @operator = ParseSymbol(s[i].ToString());
-                        Expression rightOperand = ParseSign(s[(i + 1)..]);
-                        return new Operator(leftOperand, @operator, rightOperand);
+                        Expression leftOperand = ParseFactorial(s[..i]);
+                        Expression rightOperand = ParseSign(s[(i + 1)..]); //Precedence goes up here instead of staying put (if above is unary?)
+                        return new Operation(@operator, leftOperand, rightOperand);
                     }
                     break;
                 case '(': layer++; break;
@@ -185,9 +202,9 @@ public static class ByLayerExpressionParser
     {
         if(s[^1] == '!')
         {
-            Expression operand = ParseFactorial(s[..^1]);
             Expression @operator = ParseSymbol(s[^1].ToString());
-            return new Operator(operand, @operator);
+            Expression operand = ParseFactorial(s[..^1]);
+            return new Operation(@operator, operand);
         }
         return ParseParameter(s);
     }
@@ -229,7 +246,7 @@ public static class ByLayerExpressionParser
         }
 
         Expression rightOperand = ParseParameter(s[i..]);
-        return new Operator(leftOperand, rightOperand);
+        return new Operation(leftOperand, rightOperand);
     }
 
     private static Expression ParseDot(string s)
@@ -242,10 +259,10 @@ public static class ByLayerExpressionParser
                 case '.':
                     if(layer == 0)
                     {
-                        Expression leftOperand = ParseDot(s[..i]);
                         Expression @operator = ParseSymbol(s[i].ToString());
+                        Expression leftOperand = ParseDot(s[..i]);
                         Expression rightOperand = ParseContainer(s[(i + 1)..]);
-                        return new Operator(leftOperand, @operator, rightOperand);
+                        return new Operation(@operator, leftOperand, rightOperand);
                     }
                     break;
                 case '(': layer--; break;
@@ -262,7 +279,6 @@ public static class ByLayerExpressionParser
         {
             bool isTuple = false;
             List<Expression> operands = new() {
-                ParseSymbol(s[0].ToString()),
             };
 
             int layer = 1;
@@ -280,7 +296,6 @@ public static class ByLayerExpressionParser
                             {
                                 operands.Add(Parse(s[lastIndex..j]));
                             }
-                            operands.Add(ParseSymbol(s[j].ToString()));
                             lastIndex = j + 1;
                         }
                         break;
@@ -294,14 +309,14 @@ public static class ByLayerExpressionParser
                 operands.Add(Parse(s[lastIndex..^1]));
             }
 
-            if(isTuple || operands.Count == 1)
+            if(isTuple || operands.Count == 0)
             {
-                operands.Add(ParseSymbol(s[^1].ToString()));
-                return new Operator(operands);
+                Expression @operator = ParseSymbol(s[0].ToString());
+                return new Operation(@operator, operands);
             }
             else
             {
-                return operands[1];
+                return operands[0];
             }
 
         }
@@ -311,6 +326,6 @@ public static class ByLayerExpressionParser
 
     private static Expression ParseSymbol(string s)
     {
-        return new SymbolExp(s);
+        return new Symbol(s);
     }
 }
