@@ -11,9 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Math", "Math\Math.csproj", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Optimizations", "Optimizations\Optimizations.csproj", "{59391144-B929-44D5-A4DB-ED3A93828AE2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Singification", "Singification\Singification.csproj", "{B0D86E91-ECF4-4E59-BA7D-FE2922194B78}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Stringification", "Singification\Stringification.csproj", "{B0D86E91-ECF4-4E59-BA7D-FE2922194B78}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Parsing", "Parsing\Parsing.csproj", "{CB3AC1F4-7D0B-4E7C-838C-E0E9A78743D2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Parsing", "Parsing\Parsing.csproj", "{CB3AC1F4-7D0B-4E7C-838C-E0E9A78743D2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
