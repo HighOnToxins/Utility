@@ -1,6 +1,7 @@
 ﻿
 namespace Parsing.Expressions;
 
+//Generalized by-layer expression parser
 public static class GBLEParser
 {
     public static Expression Parse(string s)
