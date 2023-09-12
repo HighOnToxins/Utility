@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Optimizations\Optimizations.csproj" />
+  </ItemGroup>
+
 </Project>
