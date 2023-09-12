@@ -47,11 +47,6 @@ public class BitList
         return (values[listIndex] >> bitIndex & 1ul) != 0;
     }
 
-    public bool[] Get(int startIndex, int length)
-    {
-        throw new NotImplementedException();
-    }
-
     public BitList Or(BitList other)
     {
         int maxCount = Math.Max(other.Count, Count);
