@@ -6,8 +6,10 @@ namespace Optimizations;
 public static class Methods
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static unsafe int ToInt(this bool b) => *(int*)&b;
+    public static unsafe ulong ToUlong(this bool b) => *(ulong*)&b;
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static unsafe int ToInt(this bool b) => *(int*)&b;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int Abs(int a) => a * ((a >= 0).ToInt() * 2 - 1);
