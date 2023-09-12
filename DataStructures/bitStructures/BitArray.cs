@@ -12,7 +12,7 @@ public class BitArray
         values = new ulong[length / sizeof(ulong)];
     }
 
-    public BitArray(int length, ulong[] values)
+    private BitArray(int length, ulong[] values)
     {
         Length = length;
         this.values = values;
@@ -26,7 +26,7 @@ public class BitArray
         int bitIndex = index % sizeof(ulong);
 
         ulong mask = 1ul << bitIndex;
-        values[listIndex] = values[listIndex] & ~mask | mask * value.ToUlong();
+        values[listIndex] = (values[listIndex] & ~mask) | (mask * value.ToUlong());
     }
 
     public bool Get(int index)
