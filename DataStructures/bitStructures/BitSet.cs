@@ -1,13 +1,11 @@
 ﻿
-using System.Collections;
-
 namespace DataStructures.bitStructures;
 
 public class BitSet<T> where T : notnull
 {
     private readonly IBitUniverse<T> universe;
 
-    private readonly BitArray array;
+    private readonly BitArray64 array;
 
     public BitSet(IBitUniverse<T> universe)
     {
@@ -15,7 +13,7 @@ public class BitSet<T> where T : notnull
         array = new(universe.Length);
     }
 
-    private BitSet(IBitUniverse<T> universe, BitArray array) : this(universe)
+    private BitSet(IBitUniverse<T> universe, BitArray64 array) : this(universe)
     {
         if(universe.Length != array.Length) throw new ArgumentException();
 
@@ -28,11 +26,11 @@ public class BitSet<T> where T : notnull
 
     public bool Contains(T value) => array[universe.IndexOf(value)];
 
-    public BitSet<T> Union(BitSet<T> other) => new(universe, array.Or(other.array));
+    public BitSet<T> Union(BitSet<T> other) => new(universe, array | other.array);
 
-    public BitSet<T> Intersect(BitSet<T> other) => new(universe, array.And(other.array));
+    public BitSet<T> Intersect(BitSet<T> other) => new(universe, array & other.array);
 
-    public BitSet<T> Compliment() => new(universe, array.Not());
+    public BitSet<T> Compliment() => new(universe, ~array);
 }
 
 public interface IBitUniverse<T> where T : notnull
