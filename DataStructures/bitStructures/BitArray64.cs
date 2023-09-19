@@ -1,5 +1,4 @@
 ﻿using Optimizations;
-using System;
 
 namespace DataStructures.bitStructures;
 
@@ -10,7 +9,7 @@ public class BitArray64
     public BitArray64(int length)
     {
         Length = length;
-        values = new ulong[length / sizeof(ulong)];
+        values = new ulong[(int)Math.Ceiling((float)length / sizeof(ulong))];
     }
 
     private BitArray64(int length, ulong[] values)
@@ -29,18 +28,18 @@ public class BitArray64
 
     public bool Get(int index)
     {
-        int listIndex = index / sizeof(ulong);
+        int arrayIndex = index / sizeof(ulong);
         int bitIndex = index % sizeof(ulong);
-        return (values[listIndex] >> bitIndex & 1ul) != 0;
+        return (values[arrayIndex] >> bitIndex & 1ul) != 0;
     }
 
     public void Set(int index, bool value = true)
     {
-        int listIndex = index / sizeof(ulong);
+        int arrayIndex = index / sizeof(ulong);
         int bitIndex = index % sizeof(ulong);
 
         ulong mask = 1ul << bitIndex;
-        values[listIndex] = (values[listIndex] & ~mask) | (mask * value.ToUlong());
+        values[arrayIndex] = (values[arrayIndex] & ~mask) | (mask * value.ToUlong());
     }
 
     private BitArray64 OperateBinary(BitArray64 other, Func<ulong, ulong, ulong> operation)

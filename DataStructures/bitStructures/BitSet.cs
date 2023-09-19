@@ -33,15 +33,11 @@ public class BitSet<T> where T : notnull
     public BitSet<T> Intersect(BitSet<T> other) => new(universe, array.And(other.array));
 
     public BitSet<T> Compliment() => new(universe, array.Not());
-
 }
 
 public interface IBitUniverse<T> where T : notnull
 {
     public int Length { get; }
 
-    public T ValueOf(int index);
-    
     public int IndexOf(T value);
-
 }

@@ -57,7 +57,7 @@ public class BigFraction
 		return new(a.Numerator * b.Denominator, a.Denominator * b.Numerator);
 	}
 
-	public static implicit operator BigFraction(BigInteger i)
+    public static implicit operator BigFraction(BigInteger i)
 	{
 		return new(i, 1);
 	}
@@ -82,7 +82,7 @@ public class BigFraction
 		return new(l, 1);
 	}
 
-	public override string ToString()
+    public override string ToString()
 	{
 		return Denominator.Equals(BigInteger.One) ? Numerator.ToString() : $"{Numerator}/{Denominator}";
 	}
@@ -96,4 +96,9 @@ public class BigFraction
 	{
 		return obj is BigFraction frac && Equals(frac);
 	}
+
+    public override int GetHashCode()
+    {
+        return Numerator.GetHashCode() ^ Denominator.GetHashCode();
+    }
 }
