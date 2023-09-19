@@ -1,7 +1,9 @@
 ﻿
+using System.Collections;
+
 namespace DataStructures.bitStructures;
 
-public class BitSet<T> where T : notnull
+public class BitSet<T> : IEnumerable<T> where T : notnull
 {
     private readonly IBitUniverse<T> universe;
 
@@ -31,11 +33,24 @@ public class BitSet<T> where T : notnull
     public BitSet<T> Intersect(BitSet<T> other) => new(universe, array & other.array);
 
     public BitSet<T> Compliment() => new(universe, ~array);
+
+    public HashSet<T> ToHashSet() => new(
+            
+        );
+
+    IEnumerator<T> IEnumerable<T>.GetEnumerator() => universe
+                .Values()
+                .Where(v => Contains(v)).GetEnumerator();
+    public IEnumerator GetEnumerator() => universe
+                .Values()
+                .Where(v => Contains(v)).GetEnumerator();
+
 }
 
 public interface IBitUniverse<T> where T : notnull
 {
     public int Length { get; }
-
     public int IndexOf(T value);
+
+    public IEnumerable<T> Values();
 }

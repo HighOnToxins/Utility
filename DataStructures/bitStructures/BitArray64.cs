@@ -4,12 +4,14 @@ namespace DataStructures.bitStructures;
 
 public class BitArray64
 {
+    private const int ulongSize = sizeof(ulong) * 8;
+
     private readonly ulong[] values;
 
     public BitArray64(int length)
     {
         Length = length;
-        values = new ulong[(int)Math.Ceiling((float)length / sizeof(ulong))];
+        values = new ulong[(int)Math.Ceiling((float)length / ulongSize)];
     }
 
     private BitArray64(int length, ulong[] values)
@@ -28,15 +30,15 @@ public class BitArray64
 
     public bool Get(int index)
     {
-        int arrayIndex = index / sizeof(ulong);
-        int bitIndex = index % sizeof(ulong);
+        int arrayIndex = index / ulongSize;
+        int bitIndex = index % ulongSize;
         return (values[arrayIndex] >> bitIndex & 1ul) != 0;
     }
 
     public void Set(int index, bool value = true)
     {
-        int arrayIndex = index / sizeof(ulong);
-        int bitIndex = index % sizeof(ulong);
+        int arrayIndex = index / ulongSize;
+        int bitIndex = index % ulongSize;
 
         ulong mask = 1ul << bitIndex;
         values[arrayIndex] = (values[arrayIndex] & ~mask) | (mask * value.ToUlong());
@@ -44,9 +46,8 @@ public class BitArray64
 
     private BitArray64 OperateBinary(BitArray64 other, Func<ulong, ulong, ulong> operation)
     {
-        int maxLength = Math.Max(other.Length, Length);
-        ulong[] newValues = new ulong[maxLength];
-        for(int i = 0; i < maxLength; i++)
+        ulong[] newValues = new ulong[values.Length];
+        for(int i = 0; i < values.Length; i++)
         {
             ulong thisBits = i < values.Length ? values[i] : 0ul;
             ulong otherBits = i < other.values.Length ? other.values[i] : 0ul;
@@ -59,8 +60,8 @@ public class BitArray64
 
     private BitArray64 OperateUnary(Func<ulong, ulong> operation)
     {
-        ulong[] newValues = new ulong[Length];
-        for(int i = 0; i < Length; i++)
+        ulong[] newValues = new ulong[values.Length];
+        for(int i = 0; i < newValues.Length; i++)
         {
             newValues[i] = operation.Invoke(values[i]);
         }
