@@ -24,7 +24,7 @@ public static class Search
 
             IEnumerable<T> options = current.GetSearchOptions()
                 .OfType<T>()
-                .Where(t => !discovered.Contains(t)));
+                .Where(t => !discovered.Contains(t));
 
             foreach(T option in options)
             {
